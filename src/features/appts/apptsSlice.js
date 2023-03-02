@@ -5,9 +5,9 @@ const initialState = {
   loading: true
 }
 
-const swapsSlice = createSlice({
-  name: "swaps",
+const apptsSlice = createSlice({
+  name: "appts",
   initialState
 })
 
-export default swapsSlice.reducer
+export default apptsSlice.reducer
