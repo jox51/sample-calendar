@@ -1,42 +1,62 @@
 import React, { useState } from "react"
-import Calendar from "react-calendar"
-import "../calendar.css"
+import Paper from "@mui/material/Paper"
+import {
+  ViewState,
+  EditingState,
+  IntegratedEditing
+} from "@devexpress/dx-react-scheduler"
+import {
+  Scheduler,
+  DayView,
+  Appointments,
+  AppointmentForm,
+  AppointmentTooltip,
+  ConfirmationDialog
+} from "@devexpress/dx-react-scheduler-material-ui"
 
-// const datesToAddContentTo = [tomorrow, in3Days, in5Days]
-
-// function tileContent({ date, view }) {
-//   // Add class to tiles in month view only
-//   if (view === "month") {
-//     // Check if a date React-Calendar wants to check is on the list of dates to add class to
-//     if (datesToAddContentTo.find((dDate) => isSameDay(dDate, date))) {
-//       return "My content"
-//     }
-//   }
-// }
+import { appointments } from "../demo-data/appointments"
 
 const DatePicker = () => {
-  const [date, setDate] = useState(new Date())
+  const [apptData, setApptData] = useState({
+    data: appointments,
+    currentDate: "2018-06-27"
+  })
+
+  const commitChanges = ({ added, changed, deleted }) => {
+    let { data } = apptData
+    if (added) {
+      const startingAddedId = data.length > 0 ? data[data.length - 1].id + 1 : 0
+      data = [...data, { id: startingAddedId, ...added }]
+    }
+    if (changed) {
+      data = data.map((appointment) =>
+        changed[appointment.id]
+          ? { ...appointment, ...changed[appointment.id] }
+          : appointment
+      )
+    }
+    if (deleted !== undefined) {
+      data = data.filter((appointment) => appointment.id !== deleted)
+    }
+    return { data }
+  }
+
+  const { data, currentDate } = apptData
 
   return (
     <>
-      <div className="app h-screen pt-10">
-        <h1 className="text-center">React Calendar</h1>
-        <div className="calendar-container flex justify-center items-center">
-          <Calendar
-            onChange={setDate}
-            value={date}
-            tileContent={({ date, view }) => {
-              return view === "month" && date.getDay() === 0 ? (
-                <p>It's Sunday!</p>
-              ) : null
-            }}
-            onClick={(value) => alert("New date is: ", value)}
-          />
-        </div>
-        <p className="text-center">
-          <span className="bold">Selected Date:</span> {date.toDateString()}
-        </p>
-      </div>
+      <Paper>
+        <Scheduler data={data} height={660}>
+          <ViewState currentDate={currentDate} />
+          <EditingState onCommitChanges={commitChanges} />
+          <IntegratedEditing />
+          <DayView startDayHour={9} endDayHour={19} />
+          <ConfirmationDialog />
+          <Appointments />
+          <AppointmentTooltip showOpenButton showDeleteButton />
+          <AppointmentForm />
+        </Scheduler>
+      </Paper>
     </>
   )
 }
