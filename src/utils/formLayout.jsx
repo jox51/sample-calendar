@@ -41,8 +41,6 @@ export const BasicLayout = ({
     onFieldChange({ covidField: nextValue })
   }
 
-  let { locationField, prepField, covidField } = layout
-
   return (
     <AppointmentForm.BasicLayout
       appointmentData={appointmentData}
@@ -51,7 +49,7 @@ export const BasicLayout = ({
     >
       <AppointmentForm.Label text="Location" type="title" />
       <AppointmentForm.TextEditor
-        value={locationField}
+        value={appointmentData.locationField}
         onValueChange={onLocationFieldChange}
         placeholder="Doctors Office"
         type="ordinaryTextEditor"
@@ -62,7 +60,7 @@ export const BasicLayout = ({
         type="title"
       />
       <AppointmentForm.TextEditor
-        value={prepField}
+        value={appointmentData.prepField}
         onValueChange={onPrepFieldChange}
         placeholder="Prep Info"
         type="multilineTextEditor"
@@ -80,7 +78,7 @@ export const BasicLayout = ({
       /> */}
       {
         <AppointmentForm.Select
-          value={covidField}
+          value={appointmentData.covidField}
           onValueChange={onCovidFieldChange}
           placeholder="Yes or No"
           availableOptions={[

@@ -1,4 +1,13 @@
 import React, { useState } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import {
+  commitChgHandler,
+  currDateChgHandler,
+  currViewNameChgHandler,
+  chgApptHandler,
+  chgAddedApptHandler,
+  chgEditedApptHandler
+} from "../features/appts/apptsSlice"
 import Paper from "@mui/material/Paper"
 import {
   ViewState,
@@ -21,22 +30,22 @@ import {
   DragDropProvider
 } from "@devexpress/dx-react-scheduler-material-ui"
 
-import { appointments } from "../demo-data/appointments"
 import { TextEditor, BasicLayout } from "../utils/formLayout"
 
 const DatePicker = () => {
-  const [apptData, setApptData] = useState({
-    data: appointments,
-    currentDate: new Date().toJSON().slice(0, 10),
-    currentViewName: "work-week",
-    addedAppointment: {},
-    appointmentChanges: {},
-    editingAppointment: undefined
-  })
+  // grabs state from redux slice/state
+  const {
+    rawData,
+    currentDate,
+    currentViewName,
+    addedAppointment,
+    appointmentChanges,
+    editingAppointment
+  } = useSelector((store) => store.appts)
+  const dispatch = useDispatch()
 
   const commitChanges = ({ added, changed, deleted }) => {
-    let { data } = apptData
-    let dataCopy = [...data]
+    let dataCopy = [...rawData]
     if (added) {
       const startingAddedId =
         dataCopy?.length > 0 ? dataCopy[dataCopy?.length - 1].id + 1 : 0
@@ -52,41 +61,31 @@ const DatePicker = () => {
     if (deleted !== undefined) {
       dataCopy = dataCopy.filter((appointment) => appointment.id !== deleted)
     }
-    setApptData((prevState) => ({ ...prevState, data: dataCopy }))
-    console.log(dataCopy)
+
+    dispatch(commitChgHandler(dataCopy))
     return { dataCopy }
   }
 
-  const {
-    data,
-    currentDate,
-    currentViewName,
-    addedAppointment,
-    appointmentChanges,
-    editingAppointment
-  } = apptData
   const currentDateChange = (currentDate) => {
-    setApptData((prevState) => ({ ...prevState, currentDate }))
+    dispatch(currDateChgHandler(currentDate))
   }
   const currentViewNameChange = (currentViewName) => {
-    setApptData((prevState) => ({ ...prevState, currentViewName }))
+    dispatch(currViewNameChgHandler(currentViewName))
   }
   const changeAppointmentChanges = (appointmentChanges) => {
-    setApptData((prevState) => ({ ...prevState, appointmentChanges }))
+    dispatch(chgApptHandler(appointmentChanges))
   }
   const changeAddedAppointment = (addedAppointment) => {
-    setApptData((prevState) => ({ ...prevState, addedAppointment }))
+    dispatch(chgAddedApptHandler(addedAppointment))
   }
   const changeEditingAppointment = (editingAppointment) => {
-    setApptData((prevState) => ({ ...prevState, editingAppointment }))
+    dispatch(chgEditedApptHandler(editingAppointment))
   }
-
-  console.log("appt data :", apptData)
 
   return (
     <>
       <Paper>
-        <Scheduler data={data} height={400} className="mt-10">
+        <Scheduler data={rawData} height={400} className="mt-10">
           <ViewState
             currentDate={currentDate}
             onCurrentDateChange={currentDateChange}
