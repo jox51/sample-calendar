@@ -8,53 +8,127 @@ import {
 import {
   Scheduler,
   DayView,
+  WeekView,
+  MonthView,
+  Toolbar,
+  DateNavigator,
+  TodayButton,
   Appointments,
   AppointmentForm,
   AppointmentTooltip,
-  ConfirmationDialog
+  ConfirmationDialog,
+  ViewSwitcher,
+  DragDropProvider
 } from "@devexpress/dx-react-scheduler-material-ui"
 
 import { appointments } from "../demo-data/appointments"
+import { TextEditor, BasicLayout } from "../utils/formLayout"
 
 const DatePicker = () => {
   const [apptData, setApptData] = useState({
     data: appointments,
-    currentDate: "2018-06-27"
+    currentDate: new Date().toJSON().slice(0, 10),
+    currentViewName: "work-week",
+    addedAppointment: {},
+    appointmentChanges: {},
+    editingAppointment: undefined
   })
 
   const commitChanges = ({ added, changed, deleted }) => {
     let { data } = apptData
+    let dataCopy = [...data]
     if (added) {
-      const startingAddedId = data.length > 0 ? data[data.length - 1].id + 1 : 0
-      data = [...data, { id: startingAddedId, ...added }]
+      const startingAddedId =
+        dataCopy?.length > 0 ? dataCopy[dataCopy?.length - 1].id + 1 : 0
+      dataCopy = [...dataCopy, { id: startingAddedId, ...added }]
     }
     if (changed) {
-      data = data.map((appointment) =>
+      dataCopy = dataCopy?.map((appointment) =>
         changed[appointment.id]
           ? { ...appointment, ...changed[appointment.id] }
           : appointment
       )
     }
     if (deleted !== undefined) {
-      data = data.filter((appointment) => appointment.id !== deleted)
+      dataCopy = dataCopy.filter((appointment) => appointment.id !== deleted)
     }
-    return { data }
+    setApptData((prevState) => ({ ...prevState, data: dataCopy }))
+    console.log(dataCopy)
+    return { dataCopy }
   }
 
-  const { data, currentDate } = apptData
+  const {
+    data,
+    currentDate,
+    currentViewName,
+    addedAppointment,
+    appointmentChanges,
+    editingAppointment
+  } = apptData
+  const currentDateChange = (currentDate) => {
+    setApptData((prevState) => ({ ...prevState, currentDate }))
+  }
+  const currentViewNameChange = (currentViewName) => {
+    setApptData((prevState) => ({ ...prevState, currentViewName }))
+  }
+  const changeAppointmentChanges = (appointmentChanges) => {
+    setApptData((prevState) => ({ ...prevState, appointmentChanges }))
+  }
+  const changeAddedAppointment = (addedAppointment) => {
+    setApptData((prevState) => ({ ...prevState, addedAppointment }))
+  }
+  const changeEditingAppointment = (editingAppointment) => {
+    setApptData((prevState) => ({ ...prevState, editingAppointment }))
+  }
+
+  console.log("appt data :", apptData)
 
   return (
     <>
       <Paper>
-        <Scheduler data={data} height={660}>
-          <ViewState currentDate={currentDate} />
-          <EditingState onCommitChanges={commitChanges} />
+        <Scheduler data={data} height={400} className="mt-10">
+          <ViewState
+            currentDate={currentDate}
+            onCurrentDateChange={currentDateChange}
+            currentViewName={currentViewName}
+            onCurrentViewNameChange={currentViewNameChange}
+          />
+          <EditingState
+            onCommitChanges={commitChanges}
+            addedAppointment={addedAppointment}
+            onAddedAppointmentChange={changeAddedAppointment}
+            appointmentChanges={appointmentChanges}
+            onAppointmentChangesChange={changeAppointmentChanges}
+            editingAppointment={editingAppointment}
+            onEditingAppointmentChange={changeEditingAppointment}
+          />
           <IntegratedEditing />
-          <DayView startDayHour={9} endDayHour={19} />
+          <WeekView
+            startDayHour={9}
+            endDayHour={19}
+            name="work-week"
+            displayName="Work Week"
+            excludedDays={[0, 6]}
+          />
+          <MonthView name="month-view" displayName="Month View" />
+          <DayView
+            startDayHour={10}
+            endDayHour={19}
+            name="day-view"
+            displayName="Day View"
+          />
+          <Toolbar />
+          <ViewSwitcher />
+          <DateNavigator />
+          <TodayButton />
           <ConfirmationDialog />
           <Appointments />
           <AppointmentTooltip showOpenButton showDeleteButton />
-          <AppointmentForm />
+          <AppointmentForm
+            basicLayoutComponent={BasicLayout}
+            textEditorComponent={TextEditor}
+          />
+          <DragDropProvider />
         </Scheduler>
       </Paper>
     </>
