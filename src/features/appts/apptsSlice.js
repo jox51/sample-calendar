@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 import { appointments } from "../../demo-data/appointments"
 
+const API_URL = import.meta.env.VITE_API_URL
+
 const initialState = {
   loading: true,
   rawData: appointments,
@@ -26,10 +28,8 @@ export const sendAppt = createAsyncThunk("send/appt", async (_, thunkAPI) => {
   }
 
   try {
-    const resp = await axios.post(
-      `http://localhost:4000/api/v1/appts/create`,
-      config
-    )
+    console.log("API URL :", API_URL)
+    const resp = await axios.post(`${API_URL}api/v1/appts/create`, config)
     return resp.data
   } catch (error) {
     return error.message
