@@ -1,7 +1,21 @@
 import React, { useState } from "react"
-
 import { AppointmentForm } from "@devexpress/dx-react-scheduler-material-ui"
+// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
+// import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker"
+// import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment"
+// import TextField from "@mui/material/TextField"
 
+// Component formats the date on the appt form
+export const DateEditor = ({ ...restProps }) => {
+  return (
+    <AppointmentForm.DateEditor
+      {...restProps}
+      inputFormat={"MM/DD/YYYY HH:mm"}
+    />
+  )
+}
+
+// Format the text field on the appt form
 export const TextEditor = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   if (props.type === "multilineTextEditor") {
@@ -20,24 +34,28 @@ export const BasicLayout = ({
   const [layout, setLayout] = useState({
     locationField: "",
     prepField: "",
-    covidField: ""
+    covidField: "",
+    startDate: "",
+    endDate: ""
   })
+
+  //fx to handle date change
+  const onDateFieldChange = (field, nextValue) => {
+    setLayout((prevState) => ({ ...prevState, field: nextValue }))
+    onFieldChange({ field: nextValue })
+  }
 
   // fx to handle location field
   const onLocationFieldChange = (nextValue) => {
     setLayout((prevState) => ({ ...prevState, locationField: nextValue }))
-    let { locationField } = layout
     onFieldChange({ locationField: nextValue })
   }
   const onPrepFieldChange = (nextValue) => {
     setLayout((prevState) => ({ ...prevState, prepField: nextValue }))
-    let { prepField } = layout
     onFieldChange({ prepField: nextValue })
   }
   const onCovidFieldChange = (nextValue) => {
     setLayout((prevState) => ({ ...prevState, covidField: nextValue }))
-    let { covidField } = layout
-    console.log("value field", nextValue)
     onFieldChange({ covidField: nextValue })
   }
 
@@ -45,6 +63,7 @@ export const BasicLayout = ({
     <AppointmentForm.BasicLayout
       appointmentData={appointmentData}
       onFieldChange={onFieldChange}
+      value={""}
       {...restProps}
     >
       <AppointmentForm.Label text="Location" type="title" />

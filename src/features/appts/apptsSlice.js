@@ -12,6 +12,30 @@ const initialState = {
   editingAppointment: undefined
 }
 
+// Post appts
+export const sendAppt = createAsyncThunk("send/appt", async (_, thunkAPI) => {
+  const { addedAppointment } = thunkAPI.getState().appts
+  // params passing user input
+  let config = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    data: {
+      appts: addedAppointment
+    }
+  }
+
+  try {
+    const resp = await axios.post(
+      `http://localhost:4000/api/v1/appts/create`,
+      config
+    )
+    return resp.data
+  } catch (error) {
+    return error.message
+  }
+})
+
 const apptsSlice = createSlice({
   name: "appts",
   initialState,

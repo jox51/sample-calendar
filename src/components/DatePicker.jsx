@@ -1,12 +1,15 @@
-import React, { useState } from "react"
+import React, { useCallback } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { ToastContainer, toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 import {
   commitChgHandler,
   currDateChgHandler,
   currViewNameChgHandler,
   chgApptHandler,
   chgAddedApptHandler,
-  chgEditedApptHandler
+  chgEditedApptHandler,
+  sendAppt
 } from "../features/appts/apptsSlice"
 import Paper from "@mui/material/Paper"
 import {
@@ -30,7 +33,7 @@ import {
   DragDropProvider
 } from "@devexpress/dx-react-scheduler-material-ui"
 
-import { TextEditor, BasicLayout } from "../utils/formLayout"
+import { TextEditor, BasicLayout, DateEditor } from "../utils/formLayout"
 
 const DatePicker = () => {
   // grabs state from redux slice/state
@@ -63,8 +66,58 @@ const DatePicker = () => {
     }
 
     dispatch(commitChgHandler(dataCopy))
+    dispatch(sendAppt())
     return { dataCopy }
   }
+
+  // validates data input
+  const CommandButon = useCallback(
+    (props) => {
+      const { id } = props
+      if (id !== "saveButton") {
+        return <AppointmentForm.CommandButton {...props} />
+      }
+
+      const isDataValid = (data) => data.title
+      const toastOptions = {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored"
+      }
+      let fieldValue = ""
+      const notify = () =>
+        toast.error(`A ${fieldValue} is Require`, toastOptions)
+
+      const nextData = editingAppointment
+        ? { ...editingAppointment, ...appointmentChanges }
+        : addedAppointment
+      const { title, locationField: location } = nextData
+
+      const isValid = () => {
+        if (!title) {
+          fieldValue = "Title"
+          return false
+        }
+
+        if (!location) {
+          fieldValue = "Location"
+          return false
+        }
+        if (title || location) {
+          return true
+        }
+      }
+
+      const onExecute = isValid() ? props.onExecute : notify
+      return <AppointmentForm.CommandButton {...props} onExecute={onExecute} />
+    },
+    [addedAppointment, appointmentChanges, editingAppointment]
+  )
 
   const currentDateChange = (currentDate) => {
     dispatch(currDateChgHandler(currentDate))
@@ -85,7 +138,12 @@ const DatePicker = () => {
   return (
     <>
       <Paper>
-        <Scheduler data={rawData} height={400} className="mt-10">
+        <Scheduler
+          locale={"en-US"}
+          data={rawData}
+          height={400}
+          className="mt-10"
+        >
           <ViewState
             currentDate={currentDate}
             onCurrentDateChange={currentDateChange}
@@ -126,9 +184,12 @@ const DatePicker = () => {
           <AppointmentForm
             basicLayoutComponent={BasicLayout}
             textEditorComponent={TextEditor}
+            dateEditorComponent={DateEditor}
+            commandButtonComponent={CommandButon}
           />
           <DragDropProvider />
         </Scheduler>
+        <ToastContainer />
       </Paper>
     </>
   )
