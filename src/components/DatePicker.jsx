@@ -99,12 +99,12 @@ const DatePicker = () => {
       const { title, locationField: location } = nextData
 
       const isValid = () => {
-        if (!title) {
+        if (!title || title.trim() == "") {
           fieldValue = "Title"
           return false
         }
 
-        if (!location) {
+        if (!location || location.trim() == "") {
           fieldValue = "Location"
           return false
         }
@@ -165,7 +165,7 @@ const DatePicker = () => {
             endDayHour={19}
             name="work-week"
             displayName="Work Week"
-            excludedDays={[0, 6]}
+            // excludedDays={[0, 6]}
           />
           <MonthView name="month-view" displayName="Month View" />
           <DayView

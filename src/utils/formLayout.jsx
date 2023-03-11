@@ -39,12 +39,6 @@ export const BasicLayout = ({
     endDate: ""
   })
 
-  //fx to handle date change
-  const onDateFieldChange = (field, nextValue) => {
-    setLayout((prevState) => ({ ...prevState, field: nextValue }))
-    onFieldChange({ field: nextValue })
-  }
-
   // fx to handle location field
   const onLocationFieldChange = (nextValue) => {
     setLayout((prevState) => ({ ...prevState, locationField: nextValue }))
